@@ -13,7 +13,7 @@ $options = [
 ];
 
 // try {
-//     $pdo = new PDO($dsn, $user, $pass, $options);
+    $pdo = new PDO($dsn, $user, $pass, $options);
 //     echo "Подключение успешно!";
 // } catch (PDOException $e) {
 //     echo "Ошибка подключения: " . $e->getMessage();
