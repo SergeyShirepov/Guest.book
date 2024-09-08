@@ -35,4 +35,68 @@ return true;
     return false;
 }
 }
+
+function login(): bool
+{
+    global $pdo;
+    $login = !empty($_POST['login']) ? trim($_POST['login']) :'';
+    $pass = !empty($_POST['pass']) ? trim($_POST['pass']) :'';
+
+    if(empty($login) || empty($pass)) {
+        $_SESSION['errors'] = 'Поля логин/пароль обязательны';
+        return false;
+}
+
+
+$res= $pdo->prepare("SELECT * FROM users WHERE login = ?");
+$res->execute([$login]);
+if(!$user =$res->fetch()) {
+    $_SESSION["errors"] = "Логин/пароль введены неверно";
+return false;
+}
+
+if(!password_verify($pass, $user["pass"])) {
+    $_SESSION["errors"] = "Логин/пароль введены неверно";
+return false;
+}else{
+    $_SESSION["success"] = 'Вы успешно авторизовались';
+    $_SESSION['user']['name'] = $user['login'];
+    $_SESSION['user']['id'] = $user['id'];
+    return true;
+}
+}
+
+function save_message(): bool
+{
+    global $pdo;
+    $message = !empty($_POST['message']) ? trim($_POST['message']) :'';
+
+    if (!isset($_SESSION['user']['name'])) {
+        $_SESSION["errors"] = "Введите текс сообщения";
+        return false;
+}
+    
+
+    if (empty($message)) {
+        $_SESSION["errors"] = "Введите текс сообщения";
+        return false;
+}
+
+$res = $pdo->prepare("INSERT INTO messages (name, message) VALUES (?,?)");
+if ($res->execute([$_SESSION['user']['name'], $message])) {
+    $_SESSION['success'] = 'Сообщение добавлено!';
+    return true;
+}else{
+    $_SESSION['errors'] = 'Ошибка!';
+    return false;
+}
+}
+
+function get_messages(): array
+{
+    global $pdo;
+    $res = $pdo->query("SELECT * FROM messages");
+    return $res ->fetchAll();
+}
+
 ?>
